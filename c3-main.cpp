@@ -101,7 +101,7 @@ void drawCar(Pose pose, int num, Color color, double alpha, pcl::visualization::
 
 Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose startingPose){
 	Eigen::Matrix4d transformMatrix = Eigen::Matrix4d::Identity();
-	Eigen::Matrix4d initialTransform = transform3D(startingPose.rotation.yaw, startingPose.rotation.pitch, startingPose.rotation.roll, startingPose.position.x, startingPose.position.z, startingPose.position.z);
+	Eigen::Matrix4d initialTransform = transform3D(startingPose.rotation.yaw, startingPose.rotation.pitch, startingPose.rotation.roll, startingPose.position.x, startingPose.position.y, startingPose.position.z);
 	PointCloudT::Ptr sourceTransform (new PointCloudT);
 	pcl::transformPointCloud(*source, *sourceTransform, initialTransform);
 
@@ -113,7 +113,7 @@ Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose start
 	icp.setMaximumIterations(iterations);
 	icp.setInputSource(sourceTransform);
 	icp.setInputTarget(target);
-	icp.setMaxCorrespondenceDistance(7);
+	icp.setMaxCorrespondenceDistance(10);
 
 	PointCloudT::Ptr icpPCL (new PointCloudT);
 	icp.align(*icpPCL);

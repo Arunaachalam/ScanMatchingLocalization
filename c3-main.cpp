@@ -99,8 +99,32 @@ void drawCar(Pose pose, int num, Color color, double alpha, pcl::visualization::
 	renderBox(viewer, box, num, color, alpha);
 }
 
-Eigen::Matrix4d ICP(pointCloudT::ptr target, PointCloudT::Ptr source, Pose startingPose){
-	Eigen::M
+Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose startingPose){
+	Eigen::Matrix4d transformMatrix = Eigen::Matrix4d::Identity();
+	Eigen::Matrix4d initialTransform = transform3D(startingPose.rotation.yaw, startingPose.rotation.pitch, startingPose.rotation.roll, startingPose.position.x, startingPose.position.z, startingPose.position.z);
+	PointCloudT::Ptr sourceTransform (new PointCloudT);
+	pcl::transformPointCloud(*source, *sourceTransform, initialTransform);
+
+	pcl::console::TicToc time;
+	time.tic();
+	pcl::IterativeClosestPoint<PointT, PointT> icp;
+	icp.setTransformationEpsilon(1e-6);
+	int iterations = 50;
+	icp.setMaximumIterations(iterations);
+	icp.setInputSource(sourceTransform);
+	icp.setInputTarget(target);
+
+	PointCloudT::Ptr icpPCL (new PointCloudT);
+	icp.align(*icpPCL);
+
+	if (icp.hasConverged())
+	{
+		transformMatrix = icp.getFinalTransformation().cast<double>();
+		transformMatrix = transformMatrix * initialTransform;
+		return transformMatrix;
+	}
+
+	return transformMatrix;
 }
 
 int main(){
@@ -219,7 +243,7 @@ int main(){
 
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
 			PointCloudT::Ptr correctPCL (new PointCloudT);
-			pcl::transformpointCloud (*filteredPCL, *correctPCL, poseTransform);
+			pcl::transformPointCloud (*filteredPCL, *correctPCL, poseTransform);
 
 			viewer->removePointCloud("scan");
 			// TODO: Change `scanCloud` below to your transformed scan

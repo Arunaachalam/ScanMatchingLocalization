@@ -113,6 +113,7 @@ Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose start
 	icp.setMaximumIterations(iterations);
 	icp.setInputSource(sourceTransform);
 	icp.setInputTarget(target);
+	icp.setMaxCorrespondenceDistance(7);
 
 	PointCloudT::Ptr icpPCL (new PointCloudT);
 	icp.align(*icpPCL);
@@ -123,6 +124,8 @@ Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose start
 		transformMatrix = transformMatrix * initialTransform;
 		return transformMatrix;
 	}
+	else
+	{ std::cout << "not converged" << std::endl;}
 
 	return transformMatrix;
 }

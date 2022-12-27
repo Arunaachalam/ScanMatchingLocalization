@@ -108,12 +108,12 @@ Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose start
 	pcl::console::TicToc time;
 	time.tic();
 	pcl::IterativeClosestPoint<PointT, PointT> icp;
-	icp.setTransformationEpsilon(1e-6);
-	int iterations = 50;
+	icp.setTransformationEpsilon(1e-8);
+	int iterations = 30;
 	icp.setMaximumIterations(iterations);
 	icp.setInputSource(sourceTransform);
 	icp.setInputTarget(target);
-	icp.setMaxCorrespondenceDistance(10);
+	icp.setMaxCorrespondenceDistance(1);
 
 	PointCloudT::Ptr icpPCL (new PointCloudT);
 	icp.align(*icpPCL);
@@ -234,7 +234,7 @@ int main(){
 			// TODO: (Filter scan using voxel filter)
 			pcl::VoxelGrid<PointT> vg;
 			vg.setInputCloud(scanCloud);
-			std::vector<double> Resolution{0.5, 0.5, 0.5};
+			std::vector<double> Resolution{0.7, 0.7, 0.7};
 			vg.setLeafSize(Resolution[0], Resolution[1], Resolution[2]);
 			typename pcl::PointCloud<PointT>::Ptr filteredPCL (new pcl::PointCloud<PointT>);
 			vg.filter(*filteredPCL);
